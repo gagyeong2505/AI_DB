@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="전기차 연구 보고서, 발표자료, 정량 데이터를 기반으로 구성한 시장·기술·전략 대시보드">
+  <title>전기차 산업 분석 대시보드</title>
+  <style>
+    /* 메인 색상 미지정: 기본 파란색. 설정에서 변경할 수 있습니다. */
+    :root {
+      --color-primary: #174ea6;
+      --color-primary-hover: #103c83;
+      --color-primary-soft: #eef4ff;
+      --color-background: #f5f7fa;
+      --color-surface: #ffffff;
+      --color-text-primary: #1d2633;
+      --color-text-secondary: #526174;
+      --color-border: #dce2ea;
+      --color-success: #166534;
+      --color-warning: #854d0e;
+      --color-error: #991b1b;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 32px;
+      --sidebar-width: 224px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    body {
+      margin: 0;
+      background: var(--color-background);
+      color: var(--color-text-primary);
+      font: 16px/1.6 Pretendard, "Noto Sans KR", "Apple SD Gothic Neo",
+        "Malgun Gothic", system-ui, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button, a, input, select { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+    a { color: var(--color-primary); }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: 32px; line-height: 1.35; letter-spacing: -.04em; }
+    h2 { font-size: 22px; line-height: 1.45; letter-spacing: -.025em; }
+    h3 { font-size: 18px; line-height: 1.5; }
+    :focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0;
+      margin: -1px; overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+    .skip-link {
+      position: fixed; top: -80px; left: 16px; z-index: 100;
+      padding: 12px 20px; background: #fff; border: 2px solid var(--color-primary);
+    }
+    .skip-link:focus { top: 12px; }
+    .muted { color: var(--color-text-secondary); }
+    .small { font-size: 14px; }
+    .row { display: flex; align-items: center; gap: 12px; }
+    .wrap { flex-wrap: wrap; }
+    .spread { justify-content: space-between; }
+    .stack { display: grid; gap: 16px; }
+    .icon {
+      width: 20px; height: 20px; flex: 0 0 20px;
+      fill: none; stroke: currentColor; stroke-width: 1.8;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; min-height: 44px; padding: 9px 16px;
+      border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      background: #fff; color: var(--color-text-primary);
+      text-decoration: none; transition: background .18s, border-color .18s;
+    }
+    .button:hover:not(:disabled) { background: #f1f4f8; border-color: #aab7c8; }
+    .button:active:not(:disabled) { background: #e5eaf1; }
+    .button.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+    .button.primary:hover { background: var(--color-primary-hover); }
+    .button.text { background: transparent; border-color: transparent; color: var(--color-primary); }
+    .icon-button { padding: 10px; width: 44px; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 8px;
+      border-radius: 4px; background: #edf1f5; color: #465568;
+      font-size: 14px; font-weight: 600; white-space: nowrap;
+    }
+    .badge.actual { background: #eaf4ed; color: var(--color-success); }
+    .badge.forecast { background: var(--color-primary-soft); color: var(--color-primary); }
+    .badge.estimate { background: #fff5df; color: var(--color-warning); }
+    .badge.unknown { background: #f8ecec; color: var(--color-error); }
+    .panel {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: 24px;
+    }
+
+    .header {
+      height: 72px; position: sticky; top: 0; z-index: 30;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 0 24px; background: #fff;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+    .brand-mark {
+      width: 36px; height: 36px; display: grid; place-items: center;
+      background: var(--color-primary); color: #fff; border-radius: 6px;
+      font-size: 16px; font-weight: 800;
+    }
+    .brand-name { font-weight: 750; letter-spacing: -.025em; }
+    .header-divider { width: 1px; height: 24px; background: var(--color-border); }
+    .menu-button { display: none; }
+    .settings-dropdown { position: relative; }
+    .dropdown {
+      position: absolute; right: 0; top: 52px; min-width: 220px;
+      background: #fff; border: 1px solid var(--color-border);
+      border-radius: 8px; padding: 8px;
+    }
+    .dropdown button { justify-content: flex-start; width: 100%; border: 0; }
+    .sidebar {
+      position: fixed; top: 72px; bottom: 0; left: 0;
+      width: var(--sidebar-width); padding: 24px 16px;
+      background: #fff; border-right: 1px solid var(--color-border);
+      display: flex; flex-direction: column; z-index: 25;
+    }
+    .nav-label { padding: 0 12px 12px; font-size: 14px; color: var(--color-text-secondary); }
+    .sidebar nav { display: grid; gap: 8px; }
+    .nav-link {
+      display: flex; align-items: center; gap: 12px; min-height: 48px;
+      padding: 12px; border-radius: 6px; text-decoration: none;
+      color: var(--color-text-secondary); border-left: 3px solid transparent;
+    }
+    .nav-link:hover { background: #f4f6f9; color: var(--color-text-primary); }
+    .nav-link.active {
+      background: var(--color-primary-soft); color: var(--color-primary);
+      border-left-color: var(--color-primary); font-weight: 700;
+    }
+    .sidebar-info {
+      margin-top: auto; padding: 16px 12px 0;
+      border-top: 1px solid var(--color-border); font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+    .main { margin-left: var(--sidebar-width); padding: 32px; }
+    .content { max-width: 1440px; margin: 0 auto; display: grid; gap: 32px; }
+    .intro { display: grid; gap: 16px; }
+    .eyebrow { color: var(--color-primary); font-size: 14px; font-weight: 700; }
+    .intro-description { margin-top: 8px; color: var(--color-text-secondary); }
+    .source-note {
+      display: flex; align-items: flex-start; gap: 12px; padding: 16px;
+      border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary);
+      background: #fff; border-radius: 6px; font-size: 14px;
+    }
+    .source-note .icon { margin-top: 2px; color: var(--color-primary); }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; }
+    .kpi { display: grid; gap: 12px; padding: 24px; }
+    .kpi-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .kpi h3 { font-size: 16px; font-weight: 600; }
+    .kpi-value { font-size: 34px; font-weight: 760; line-height: 1.2; color: var(--color-primary); font-variant-numeric: tabular-nums; }
+    .kpi-value span { font-size: 16px; color: var(--color-text-secondary); font-weight: 500; margin-left: 4px; }
+    .kpi-bottom { font-size: 14px; color: var(--color-text-secondary); }
+    .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .chart-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+    figure { margin: 0; min-width: 0; }
+    .chart-heading { display: grid; gap: 4px; }
+    .chart { width: 100%; height: auto; display: block; margin: 16px 0 8px; }
+    .chart text { font-family: inherit; font-size: 14px; fill: var(--color-text-secondary); }
+    .chart .gridline { stroke: #e5eaf0; stroke-width: 1; }
+    .chart .data-line { fill: none; stroke: var(--color-primary); stroke-width: 3; }
+    .chart .point { fill: var(--color-primary); }
+    .chart .value-label { fill: var(--color-primary); font-weight: 750; font-size: 18px; }
+    .chart .primary-stroke { stroke: var(--color-primary); }
+    .legend { font-size: 14px; color: var(--color-text-secondary); display: flex; flex-wrap: wrap; gap: 16px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-line { width: 20px; border-top: 3px solid var(--color-primary); }
+    .legend-line.dashed { border-top-style: dashed; }
+    .legend-square { width: 12px; height: 12px; background: var(--color-primary); border-radius: 2px; }
+    .legend-square.neutral { background: #dce3ec; }
+    figcaption { margin-top: 12px; font-size: 14px; color: var(--color-text-secondary); }
+    .details-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; }
+    .strategy-list { margin: 16px 0 0; padding: 0; list-style: none; }
+    .strategy-list li { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+    .strategy-list li:last-child { border: 0; padding-bottom: 0; }
+    .number { color: var(--color-primary); font-weight: 750; font-variant-numeric: tabular-nums; }
+    .strategy-list strong { display: block; margin-bottom: 4px; }
+    .detail-list { margin: 16px 0 0; }
+    .detail-list > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+    .detail-list > div:last-child { border: 0; }
+    .detail-list dt { color: var(--color-text-secondary); }
+    .detail-list dd { margin: 0; font-weight: 650; text-align: right; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tab[aria-selected="true"] { background: var(--color-primary-soft); color: var(--color-primary); border-color: var(--color-primary); }
+    .timeline { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; padding: 0; list-style: none; margin: 16px 0 0; }
+    .timeline li { background: #f5f7fa; border: 1px solid var(--color-border); border-radius: 6px; padding: 16px; }
+    .timeline strong { display: block; margin: 8px 0; }
+    .risk-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 16px; }
+    .risk-item { padding: 16px; border: 1px solid var(--color-border); border-radius: 6px; }
+    .risk-item p { margin-top: 8px; }
+
+    label { font-size: 14px; font-weight: 600; }
+    input[type="search"], select {
+      width: 100%; min-height: 44px; padding: 10px 12px;
+      background: #fff; border: 1px solid #9aa8ba; border-radius: 6px;
+      color: var(--color-text-primary);
+    }
+    input::placeholder { color: #657286; }
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--color-primary); }
+    .filters {
+      display: grid; grid-template-columns: minmax(240px,2fr) repeat(3,minmax(140px,1fr)) auto;
+      gap: 16px; align-items: end; margin-bottom: 16px;
+    }
+    .field { display: grid; gap: 6px; }
+    .table-toolbar { margin-bottom: 16px; }
+    .check-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; min-height: 44px; }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 6px; }
+    table { border-collapse: collapse; width: 100%; min-width: 920px; font-size: 14px; }
+    caption { text-align: left; padding: 12px 16px; background: #fff; color: var(--color-text-secondary); }
+    th, td { padding: 14px 16px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-border); }
+    th { background: #f3f5f8; font-weight: 650; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f7faff; }
+    .numeric { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .sort-button { border: 0; background: transparent; padding: 8px 0; color: inherit; min-height: 44px; }
+    .sort-button:hover { color: var(--color-primary); }
+    .cell-title { min-width: 180px; }
+    .table-detail { min-height: 36px; padding: 4px 8px; }
+    .pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+    .page-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .page-buttons .button { min-width: 44px; padding: 8px; }
+    .page-buttons [aria-current="page"] { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+    .report-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+    .report-grid h3 { margin-bottom: 8px; }
+    .report-grid p { font-size: 14px; color: var(--color-text-secondary); }
+    .report-grid .badge { margin-bottom: 12px; }
+    .footer { border-top: 1px solid var(--color-border); padding-top: 24px; font-size: 14px; color: var(--color-text-secondary); }
+    .tooltip { position: relative; display: inline-flex; }
+    .tooltip-content {
+      display: none; position: absolute; right: 0; top: 48px; width: 260px;
+      padding: 12px; background: #243145; color: #fff; border-radius: 6px;
+      font-size: 14px; z-index: 10;
+    }
+    .tooltip:hover .tooltip-content, .tooltip:focus-within .tooltip-content { display: block; }
+    dialog {
+      width: min(640px,calc(100% - 32px)); max-height: 85vh;
+      border: 1px solid var(--color-border); border-radius: 8px;
+      padding: 24px; color: var(--color-text-primary); background: #fff;
+    }
+    dialog::backdrop { background: rgb(20 30 45 / .45); }
+    .dialog-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+    .dialog-body { display: grid; gap: 16px; }
+    .dialog-body dl { margin: 0; display: grid; gap: 12px; }
+    .dialog-body dt { font-size: 14px; color: var(--color-text-secondary); }
+    .dialog-body dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+    .switch-label { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; }
+    .switch { appearance: none; width: 44px !important; height: 26px !important; border-radius: 16px; background: #68788b; position: relative; cursor: pointer; }
+    .switch::before { content: ""; position: absolute; width: 20px; height: 20px; top: 3px; left: 3px; background: #fff; border-radius: 50%; transition: transform .18s; }
+    .switch:checked { background: var(--color-primary); }
+    .switch:checked::before { transform: translateX(18px); }
+    .compact td { padding-top: 8px; padding-bottom: 8px; }
+    .overlay { display: none; }
+
+    @media (min-width: 1600px) {
+      .main { padding: 40px; }
+    }
+    @media (max-width: 1199px) {
+      :root { --sidebar-width: 192px; }
+      .main { padding: 24px; }
+      .kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .chart-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .chart-grid figure:last-child { grid-column: 1 / -1; }
+      .chart-grid figure:last-child .chart { max-width: 360px; margin-inline: auto; }
+      .filters { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .filters > .field:first-child { grid-column: 1 / -1; }
+      .details-grid { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: repeat(3,minmax(0,1fr)); }
+      .report-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 767px) {
+      html { scroll-padding-top: 80px; }
+      .header { height: 64px; padding: 0 16px; gap: 8px; }
+      .header-divider, .header-page, .header-source { display: none; }
+      .brand-name { font-size: 16px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .menu-button { display: inline-flex; }
+      .sidebar { top: 64px; width: 260px; transform: translateX(-100%); transition: transform .2s; }
+      .sidebar.open { transform: translateX(0); }
+      .overlay.open { display: block; position: fixed; inset: 64px 0 0; background: rgb(20 30 45 / .4); z-index: 24; }
+      .main { margin: 0; padding: 24px 16px; }
+      .content { gap: 24px; }
+      h1 { font-size: 28px; }
+      .kpi { padding: 20px 16px; }
+      .kpi-top { display: grid; }
+      .kpi-value { font-size: 28px; }
+      .chart-grid, .details-grid, .risk-grid { grid-template-columns: 1fr; }
+      .chart-grid figure:last-child { grid-column: auto; }
+      .chart { max-width: 440px; margin-inline: auto; }
+      .panel { padding: 20px 16px; }
+      .section-heading { align-items: flex-start; }
+      .timeline { grid-template-columns: 1fr; }
+      .timeline li { display: grid; grid-template-columns: 28px 1fr; gap: 0 12px; }
+      .timeline li .number { grid-row: 1 / 3; }
+      .timeline strong { margin: 0 0 4px; }
+      .filters { gap: 12px; }
+      .filters .button { width: 100%; }
+      .pagination { align-items: flex-start; }
+      .page-buttons { gap: 4px; }
+    }
+    @media (max-width: 380px) {
+      .kpi-grid, .filters { grid-template-columns: 1fr; }
+      .filters > .field:first-child { grid-column: auto; }
+      .header .brand-name { max-width: 125px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before { transition: none !important; }
+    }
+    @media print {
+      .header, .sidebar, .filters, .pagination, .table-toolbar, .button, .tabs { display: none !important; }
+      .main { margin: 0; padding: 0; }
+      body { background: #fff; }
+      .panel { break-inside: avoid; }
+      .table-scroll { overflow: visible; }
+      table { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">본문 바로가기</a>
+
+  <svg class="sr-only" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v16h16M7 15l4-5 4 2 5-7"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M15 10v10"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8zM14 3v5h5M8 12h8M8 16h6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="white"/><circle cx="15" cy="12" r="2" fill="white"/><circle cx="8" cy="18" r="2" fill="white"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  </svg>
+
+  <header class="header">
+    <div class="row">
+      <button class="button icon-button menu-button" id="menuButton" aria-label="메뉴 열기" aria-expanded="false" aria-controls="sidebar">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+      <a class="brand" href="#overview">
+        <span class="brand-mark" aria-hidden="true">EV</span>
+        <span class="brand-name">전기차 산업 분석</span>
+      </a>
+      <span class="header-divider" aria-hidden="true"></span>
+      <span class="muted small header-page">연구 데이터 대시보드</span>
+    </div>
+    <div class="row">
+      <button class="button text header-source" id="sourceButton">자료 기준</button>
+      <div class="settings-dropdown">
+        <button class="button icon-button" id="settingsButton" aria-label="설정 메뉴" aria-expanded="false" aria-controls="settingsMenu">
+          <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+        </button>
+        <div class="dropdown" id="settingsMenu" hidden>
+          <button class="button" id="displayButton">화면 설정</button>
+          <button class="button" id="infoButton">자료 및 해석 기준</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar" aria-label="주요 메뉴">
+    <p class="nav-label">연구 탐색</p>
+    <nav>
+      <a class="nav-link active" href="#overview" aria-current="location"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg>대시보드</a>
+      <a class="nav-link" href="#visualization"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>시장·인프라 통계</a>
+      <a class="nav-link" href="#strategy"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>전략·실행계획</a>
+      <a class="nav-link" href="#data"><svg class="icon" aria-hidden="true"><use href="#i-table"/></svg>정량 데이터</a>
+      <a class="nav-link" href="#reports"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>보고서·자료 기준</a>
+    </nav>
+    <div class="sidebar-info">
+      <strong>2026년 9월 기준 자료</strong>
+      <p>2025년 문서상 실적<br>2026년 전망·초기 동향</p>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main" id="main" tabindex="-1">
+    <div class="content">
+      <section class="intro" id="overview" aria-labelledby="pageTitle">
+        <div class="row spread wrap">
+          <div>
+            <p class="eyebrow">시장 · 기술 · 정책</p>
+            <h1 id="pageTitle">전기차 연구 대시보드</h1>
+            <p class="intro-description">지역별 시장 변화와 한국 전기차 생태계의 핵심 과제를 확인합니다.</p>
+          </div>
+          <button class="button primary" id="goToData">정량 데이터 조회</button>
+        </div>
+        <div class="row wrap small muted">
+          <span>분석 범위: 2025년 실적 · 2026년 전망</span>
+          <span>지역: 세계 · 한국</span>
+          <span>자료 기준: 2026년 9월</span>
+          <span>최신 갱신일: 자료에 미기재</span>
+        </div>
+        <div class="source-note">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+          <p>제공된 보고서·발표자료·정량 데이터의 수치입니다. 전망, 근사값, 역산 추정치를 구분하며 원출처 통계의 정확성과 최신성은 별도 검증하지 않았습니다.</p>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="panel kpi">
+            <div class="kpi-top"><h3>세계 전기 승용차 판매</h3><span class="badge forecast">2026 전망</span></div>
+            <p class="kpi-value">약 2,300<span>만 대</span></p>
+            <p class="kpi-bottom">2025년: 2,000만 대 초과<br>정확한 판매 증가율 산출 불가</p>
+          </article>
+          <article class="panel kpi">
+            <div class="kpi-top"><h3>세계 신차 중 전기차 비중</h3><span class="badge forecast">2026 전망</span></div>
+            <p class="kpi-value">28<span>%</span></p>
+            <p class="kpi-bottom">2025년 25% 대비 +3%p<br>제시 수치 기반 계산</p>
+          </article>
+          <article class="panel kpi">
+            <div class="kpi-top"><h3>한국 전기 승용차 판매</h3><span class="badge actual">2025 실적*</span></div>
+            <p class="kpi-value">20<span>만 대 초과</span></p>
+            <p class="kpi-bottom">전년 대비 약 65% 증가<br>국내 신차 비중 11%</p>
+          </article>
+          <article class="panel kpi">
+            <div class="kpi-top"><h3>한국 급속·초급속 충전</h3><span class="badge actual">2025 실적*</span></div>
+            <p class="kpi-value">약 5.1<span>만 기</span></p>
+            <p class="kpi-bottom">전년 대비 약 10% 증가<br>충전소 부지가 아닌 충전 포인트</p>
+          </article>
+        </div>
+        <p class="small muted">* 실적은 제공 문서의 분류를 의미합니다. 상단 요약과 차트는 전체 자료 기준이며, 아래 검색·필터는 정량 데이터 표에 적용됩니다.</p>
+      </section>
+
+      <section id="visualization" aria-labelledby="chartTitle">
+        <div class="section-heading">
+          <h2 id="chartTitle">시장·인프라 통계</h2>
+          <span class="tooltip">
+            <button class="button icon-button" aria-label="차트 해석 안내" aria-describedby="chartTip">
+              <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>
+            </button>
+            <span class="tooltip-content" id="chartTip" role="tooltip">점선은 전망 또는 역산 추정치가 포함된 비교입니다. 각 차트의 축과 단위를 확인하세요.</span>
+          </span>
+        </div>
+        <div class="chart-grid">
+          <figure class="panel">
+            <div class="chart-heading"><h3>세계 전기차 신차 비중</h3><p class="small muted">2025년 실적 → 2026년 전망 · 단위 %</p></div>
+            <svg class="chart" viewBox="0 0 360 240" role="img" aria-labelledby="shareTitle shareDesc">
+              <title id="shareTitle">세계 신차 중 전기차 비중 비교</title>
+              <desc id="shareDesc">세로축은 0에서 40퍼센트. 2025년 문서상 실적 25퍼센트, 2026년 전망 28퍼센트. 차이는 3퍼센트포인트입니다.</desc>
+              <g class="gridline"><path d="M48 188H332M48 148H332M48 108H332M48 68H332M48 28H332"/></g>
+              <g text-anchor="end"><text x="38" y="193">0</text><text x="38" y="153">10</text><text x="38" y="113">20</text><text x="38" y="73">30</text><text x="38" y="33">40</text></g>
+              <path class="data-line" stroke-dasharray="7 5" d="M106 88L274 76"/>
+              <circle class="point" cx="106" cy="88" r="5"/>
+              <circle cx="274" cy="76" r="5" fill="white" class="primary-stroke" stroke-width="3"/>
+              <text class="value-label" x="106" y="68" text-anchor="middle">25%</text>
+              <text class="value-label" x="274" y="56" text-anchor="middle">28%</text>
+              <text x="106" y="216" text-anchor="middle">2025 실적</text>
+              <text x="274" y="216" text-anchor="middle">2026 전망</text>
+            </svg>
+            <div class="legend"><span class="legend-item"><span class="legend-line dashed"></span>실적·전망 비교</span></div>
+            <figcaption>비중 변화 +3%p · 상대 증가 12%. 판매량 증가율을 의미하지 않습니다.</figcaption>
+          </figure>
+
+          <figure class="panel">
+            <div class="chart-heading"><h3>한국 급속·초급속 충전</h3><p class="small muted">2024년 역산 → 2025년 실적 · 단위 만 기</p></div>
+            <svg class="chart" viewBox="0 0 360 240" role="img" aria-labelledby="chargingTitle chargingDesc">
+              <title id="chargingTitle">한국 급속·초급속 충전 포인트 비교</title>
+              <desc id="chargingDesc">세로축은 0에서 6만 기. 2024년 역산 추정 약 4.64만 기, 2025년 약 5.1만 기. 2024년 값은 조사 실적이 아닙니다.</desc>
+              <g class="gridline"><path d="M48 188H332M48 135H332M48 81H332M48 28H332"/></g>
+              <g text-anchor="end"><text x="38" y="193">0</text><text x="38" y="140">2</text><text x="38" y="86">4</text><text x="38" y="33">6</text></g>
+              <path class="data-line" stroke-dasharray="7 5" d="M106 64.3L274 52"/>
+              <circle cx="106" cy="64.3" r="5" fill="white" class="primary-stroke" stroke-width="3"/>
+              <circle class="point" cx="274" cy="52" r="5"/>
+              <text class="value-label" x="106" y="45" text-anchor="middle">약 4.64</text>
+              <text class="value-label" x="274" y="33" text-anchor="middle">약 5.10</text>
+              <text x="106" y="216" text-anchor="middle">2024 역산</text>
+              <text x="274" y="216" text-anchor="middle">2025 실적</text>
+            </svg>
+            <div class="legend"><span class="legend-item"><span class="legend-line dashed"></span>추정·실적 비교</span></div>
+            <figcaption>2024년은 51,000 ÷ 1.10을 백 단위로 반올림한 추정치입니다. 증가분 역산은 약 4,600기입니다.</figcaption>
+          </figure>
+
+          <figure class="panel">
+            <div class="chart-heading"><h3>한국 신차 판매 구성</h3><p class="small muted">2025년 문서상 실적 · 단위 %</p></div>
+            <svg class="chart" viewBox="0 0 360 240" role="img" aria-labelledby="donutTitle donutDesc">
+              <title id="donutTitle">한국 신차 중 전기차 비중</title>
+              <desc id="donutDesc">전기차 11퍼센트, 전기차 외 89퍼센트. 전기차 외 비중은 100에서 11을 뺀 계산값입니다.</desc>
+              <circle cx="180" cy="112" r="76" fill="none" stroke="#dce3ec" stroke-width="24"/>
+              <circle cx="180" cy="112" r="76" fill="none" class="primary-stroke" stroke-width="24" stroke-dasharray="52.53 477.52" transform="rotate(-90 180 112)"/>
+              <text x="180" y="108" text-anchor="middle" class="value-label" style="font-size:32px">11%</text>
+              <text x="180" y="134" text-anchor="middle">전기차 비중</text>
+              <text x="180" y="223" text-anchor="middle">전기차 외 89% · 계산값</text>
+            </svg>
+            <div class="legend">
+              <span class="legend-item"><span class="legend-square"></span>전기차 11%</span>
+              <span class="legend-item"><span class="legend-square neutral"></span>전기차 외 89%</span>
+            </div>
+            <figcaption>분모는 한국 신차 판매입니다. 세계 신차 비중과 지역 범위가 다릅니다.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="strategy" aria-labelledby="strategyTitle">
+        <div class="section-heading"><h2 id="strategyTitle">전략·실행계획</h2><span class="badge">제안·계획</span></div>
+        <div class="details-grid">
+          <article class="panel">
+            <h3>한국 생태계의 우선 과제</h3>
+            <ol class="strategy-list">
+              <li><span class="number">01</span><div><strong>배터리 포트폴리오 다변화</strong><p class="small muted">NMC 경쟁력을 유지하며 LFP·미드니켈·재활용 소재에 대응합니다.</p></div></li>
+              <li><span class="number">02</span><div><strong>충전 UX·공동주택 개선</strong><p class="small muted">가동률, 대기·완료 정보, 결제 호환성과 전력 배분을 개선합니다.</p></div></li>
+              <li><span class="number">03</span><div><strong>안전·이력 데이터 체계</strong><p class="small muted">BMS·SOH, 충전 이력, 보증 정보와 이상징후 관리를 연결합니다.</p></div></li>
+              <li><span class="number">04</span><div><strong>V2G·순환경제 실증</strong><p class="small muted">양방향 전력 교환과 배터리 재사용·재활용의 사업성을 검증합니다.</p></div></li>
+            </ol>
+            <p class="small muted" style="margin-top:16px">발표자료는 공통 4개 과제에 ‘글로벌 정책 대응 강화’를 추가해 핵심 전략 5개로 구성합니다.</p>
+          </article>
+          <article class="panel">
+            <h3>운영·성과 측정 기준</h3>
+            <dl class="detail-list">
+              <div><dt>실무 점검</dt><dd>월 1회</dd></div>
+              <div><dt>성과 검토</dt><dd>분기 1회</dd></div>
+              <div><dt>성과지표</dt><dd>3개</dd></div>
+              <div><dt>주요 마일스톤</dt><dd>3개</dd></div>
+              <div><dt>충전 이용 성공률</dt><dd><span class="badge unknown">기준값 미확인</span></dd></div>
+              <div><dt>배터리 상태정보 제공률</dt><dd><span class="badge unknown">기준값 미확인</span></dd></div>
+              <div><dt>핵심 소재 다변화</dt><dd><span class="badge unknown">평가 기준 미정</span></dd></div>
+              <div><dt>총 소요예산</dt><dd><span class="badge unknown">미산정</span></dd></div>
+            </dl>
+            <p class="small muted" style="margin-top:16px">연중 운영을 가정하면 점검은 연 12회, 검토는 연 4회입니다. 실제 수행 횟수나 달성률이 아닙니다.</p>
+          </article>
+        </div>
+
+        <div class="panel" style="margin-top:16px">
+          <div class="tabs" role="tablist" aria-label="실행계획 및 리스크">
+            <button class="button tab" id="roadmapTab" role="tab" aria-selected="true" aria-controls="roadmapPanel" tabindex="0">실행 단계</button>
+            <button class="button tab" id="riskTab" role="tab" aria-selected="false" aria-controls="riskPanel" tabindex="-1">주요 리스크</button>
+          </div>
+          <div id="roadmapPanel" role="tabpanel" aria-labelledby="roadmapTab" tabindex="0">
+            <h3>단계별 추진 방향</h3>
+            <ol class="timeline">
+              <li><span class="number">01</span><strong>기획</strong><p class="small muted">범위·지표·기준 확정</p></li>
+              <li><span class="number">02</span><strong>준비</strong><p class="small muted">데이터·파트너 확보</p></li>
+              <li><span class="number">03</span><strong>실행</strong><p class="small muted">충전·안전·공급망 대응</p></li>
+              <li><span class="number">04</span><strong>점검</strong><p class="small muted">성과·리스크 검토</p></li>
+              <li><span class="number">05</span><strong>완료·평가</strong><p class="small muted">종합 평가·확산 결정</p></li>
+            </ol>
+            <p class="small muted" style="margin-top:16px">구체적인 착수·완료 날짜는 미확정입니다. 마지막 단계는 보고서에서 ‘완료’, 발표자료에서 ‘평가’로 표기합니다.</p>
+          </div>
+          <div id="riskPanel" role="tabpanel" aria-labelledby="riskTab" tabindex="0" hidden>
+            <h3>보고서의 정성적 위험 평가</h3>
+            <div class="risk-grid">
+              <article class="risk-item"><strong>정책·보조금 변동</strong><p class="small">발생 가능성 높음 · 영향도 높음</p><p class="small muted">정책 시나리오별 수요 분석과 가격·투자계획 재조정</p></article>
+              <article class="risk-item"><strong>중국발 가격·공급망 경쟁</strong><p class="small">발생 가능성 높음 · 영향도 높음</p><p class="small muted">기술·공급처 다변화와 현지화·원가 혁신</p></article>
+              <article class="risk-item"><strong>배터리 안전사고</strong><p class="small">발생 가능성 중간 · 영향도 매우 높음</p><p class="small muted">BMS·열전파 차단·이력관리와 현장 대응</p></article>
+              <article class="risk-item"><strong>충전망 품질 저하</strong><p class="small">발생 가능성 중간 · 영향도 높음</p><p class="small muted">가동률·고장·전력부하 모니터링과 용량 재배치</p></article>
+            </div>
+            <p class="small muted" style="margin-top:16px">정성 평가를 임의의 점수나 발생 확률로 환산하지 않았습니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="data" aria-labelledby="dataTitle">
+        <div class="section-heading">
+          <div><h2 id="dataTitle">정량 데이터</h2><p class="small muted">원자료 34개 항목 · 수치의 구분과 해석 한계를 함께 확인하세요.</p></div>
+        </div>
+        <div class="panel">
+          <form class="filters" id="filterForm" role="search" aria-label="정량 데이터 검색">
+            <div class="field"><label for="search">항목 검색</label><input type="search" id="search" placeholder="항목명, 수치, 해석 검색"></div>
+            <div class="field"><label for="region">지역·범위</label><select id="region"><option value="">전체</option><option>세계</option><option>한국</option><option>공통</option><option>사업 계획</option><option>중국·유럽·미국</option></select></div>
+            <div class="field"><label for="year">기준 시점</label><select id="year"><option value="">전체</option><option value="2025">2025년 포함</option><option value="2026">2026년 포함</option><option value="2024">2024년 포함</option><option value="other">기타·계획</option></select></div>
+            <div class="field"><label for="category">분류</label><select id="category"><option value="">전체</option></select></div>
+            <button class="button" type="reset">초기화</button>
+          </form>
+          <div class="row spread wrap table-toolbar">
+            <p class="small muted" id="resultCount" role="status" aria-live="polite"></p>
+            <label class="check-label"><input type="checkbox" id="numericOnly">숫자값이 있는 항목만</label>
+          </div>
+          <div class="table-scroll" role="region" aria-label="정량 데이터 표, 가로 스크롤 가능" tabindex="0">
+            <table id="dataTable">
+              <caption>숫자값 공란은 0이 아닙니다. ‘초과’ 수치의 숫자값은 정확한 실적이 아닌 초과 기준값입니다.</caption>
+              <thead>
+                <tr>
+                  <th scope="col" aria-sort="none"><button class="sort-button" data-sort="category">분류 ↕</button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-button" data-sort="name">항목 ↕</button></th>
+                  <th scope="col">지역</th>
+                  <th scope="col">기준 시점</th>
+                  <th scope="col">수치 구분</th>
+                  <th scope="col" class="numeric" aria-sort="none"><button class="sort-button" data-sort="value">표시값 ↕</button></th>
+                  <th scope="col">대조 결과</th>
+                  <th scope="col">근거·제한</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="row wrap">
+              <label for="pageSize">페이지당</label>
+              <select id="pageSize" style="width:92px"><option value="8">8개</option><option value="16">16개</option><option value="34">전체</option></select>
+              <span class="small muted" id="pageInfo"></span>
+            </div>
+            <nav class="page-buttons" id="pagination" aria-label="데이터 페이지"></nav>
+          </div>
+          <noscript><p>데이터 표의 검색·정렬·페이지네이션에는 JavaScript가 필요합니다. 상단 요약과 차트는 JavaScript 없이도 확인할 수 있습니다.</p></noscript>
+        </div>
+      </section>
+
+      <section id="reports" aria-labelledby="reportTitle">
+        <div class="section-heading"><h2 id="reportTitle">보고서·자료 기준</h2><button class="button text" id="limitationsButton">해석 기준 상세</button></div>
+        <div class="report-grid">
+          <article class="panel">
+            <span class="badge">연구 보고서</span>
+            <h3>산업·시장·기술·정책 분석</h3>
+            <p>2026년 전기차 산업·시장·기술·정책 종합 분석 보고서. 세계·한국 시장, 배터리·충전 기술, 실행계획과 리스크를 제시합니다.</p>
+          </article>
+          <article class="panel">
+            <span class="badge">발표자료 · 8장</span>
+            <h3>핵심 현황과 전략</h3>
+            <p>시장 현황, 한국 인프라, 산업 과제, 기술 변화, 핵심 전략, 실행계획과 결론으로 구성됩니다. 일부 근사 표현이 생략되어 있습니다.</p>
+          </article>
+          <article class="panel">
+            <span class="badge">정량 데이터 · 34항목</span>
+            <h3>입력 자료 간 대조</h3>
+            <p>실적·전망·계산·계획·미확인 값을 구분합니다. 서로 다른 단위의 합계·평균은 시장 총량이나 사업 성과로 해석할 수 없습니다.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p><strong>분석 범위</strong> · BEV·PHEV 중심, 대한민국 및 세계 시장 · 자료 기준 2026년 9월</p>
+        <p>보고서와 발표자료는 동일 연구 기반이며 독립적인 두 출처의 검증이 아닙니다. 정책·보조금·법령과 시장 수치는 활용 시점에 최신 공식자료로 확인해야 합니다.</p>
+      </footer>
+    </div>
+  </main>
+
+  <dialog id="detailDialog" aria-labelledby="detailTitle">
+    <div class="dialog-header"><h2 id="detailTitle">데이터 상세</h2><button class="button icon-button" data-close aria-label="상세 창 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-body" id="detailBody"></div>
+    <form method="dialog" class="dialog-actions"><button class="button primary">확인</button></form>
+  </dialog>
+
+  <dialog id="infoDialog" aria-labelledby="infoTitle">
+    <div class="dialog-header"><h2 id="infoTitle">자료 및 해석 기준</h2><button class="button icon-button" data-close aria-label="안내 창 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-body">
+      <p>제공된 연구 보고서, 8장 발표자료와 정량 데이터 파일을 기반으로 구성했습니다. 외부 통계의 정확성·최신성을 추가 검증한 결과가 아닙니다.</p>
+      <dl>
+        <div><dt>실적·전망</dt><dd>2025년 수치는 문서상 실적, 2026년 수치는 전망으로 구분합니다.</dd></div>
+        <div><dt>초과·근사·범위</dt><dd>‘20만 대 초과’, ‘약 65%’ 등의 한정을 유지합니다. 800~1,000V는 전압 범위이며 충전 시간이나 출력이 아닙니다.</dd></div>
+        <div><dt>역산·계획</dt><dd>2024년 충전 포인트는 역산 추정치입니다. 연간 점검 횟수는 연중 운영을 가정한 조건부 계산값입니다.</dd></div>
+        <div><dt>합계·평균</dt><dd>원파일의 숫자값 합계 43,303,000, 평균 1,732,120은 서로 다른 단위·기간의 수치 25개를 합친 산술 집계입니다. 의미 있는 시장 지표로 표시하지 않습니다. 전압 상한값의 합계·평균은 각각 1,000V, 수치 개수는 1개입니다.</dd></div>
+        <div><dt>산출 불가</dt><dd>지역별 시장 규모, 충전 품질 개선 효과, 성과 달성률, 리스크 확률과 충전 시간 단축 효과는 입력 자료만으로 산출할 수 없습니다.</dd></div>
+        <div><dt>출처 표기</dt><dd>보고서는 IEA Global EV Outlook 2026, 무공해차 통합누리집 등을 출처로 기재합니다. 제공 파일에 확인 가능한 원문 URL은 없습니다.</dd></div>
+      </dl>
+    </div>
+    <form method="dialog" class="dialog-actions"><button class="button primary">확인</button></form>
+  </dialog>
+
+  <dialog id="displayDialog" aria-labelledby="displayTitle">
+    <div class="dialog-header"><h2 id="displayTitle">화면 설정</h2><button class="button icon-button" data-close aria-label="설정 창 닫기"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+    <div class="dialog-body">
+      <div class="field"><label for="themeColor">메인 색상</label><select id="themeColor"><option value="blue">파란색</option><option value="orange">주황색</option><option value="green">초록색</option></select></div>
+      <label class="switch-label" for="compact"><span>표 간격을 좁게 표시</span><input class="switch" type="checkbox" role="switch" id="compact"></label>
+      <p class="small muted">설정은 현재 화면에 적용됩니다.</p>
+    </div>
+    <form method="dialog" class="dialog-actions"><button class="button primary">완료</button></form>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    /*
+      정량 데이터 시트의 34개 항목.
+      value: 원파일의 숫자값, null: 미확인·미산정·산출 불가.
+      초과 기준값과 근사값은 display 및 note에서 명확히 구분합니다.
+    */
+    const rawData = [
+      ["시장","전기 승용차 판매","세계","2025년","문서상 실적",20000000,"대","2,000만 대 초과","보고서만 제시","숫자값은 초과 기준이며 정확한 판매량 아님","요약 보고;Ⅱ-2","",""],
+      ["시장","신차 중 전기차 비중","세계","2025년","문서상 실적",25,"%","25%","보고서만 제시","분모는 세계 신차 판매","요약 보고;Ⅱ-2","",""],
+      ["시장","전기 승용차 판매","세계","2026년","전망",23000000,"대","약 2,300만 대","일치","확정 실적 아님","요약 보고","2",""],
+      ["시장","신차 중 전기차 비중","세계","2026년","전망",28,"%","28%","일치","확정 실적 아님","요약 보고","2",""],
+      ["시장","전기 승용차 판매","한국","2025년","문서상 실적",200000,"대","20만 대 초과","일치","숫자값은 초과 기준이며 정확한 판매량 아님","요약 보고;Ⅱ-2","3",""],
+      ["시장","전기 승용차 판매 증가율","한국","2025년;전년 대비","문서상 실적",65,"%","약 65%","숫자 일치;발표자료 근사 표기 생략","분모는 2024년 한국 전기 승용차 판매","Ⅱ-2","3",""],
+      ["시장","신차 중 전기차 비중","한국","2025년","문서상 실적",11,"%","11%","일치","분모는 한국 신차 판매","요약 보고","3",""],
+      ["인프라","급속·초급속 충전 포인트","한국","2025년","문서상 실적",51000,"기","약 5만 1,000기","숫자 일치;발표자료 근사 표현·단위 보완 필요","충전소 부지 수와 구분","Ⅱ-2","3",""],
+      ["인프라","급속·초급속 충전 포인트 증가율","한국","2025년;전년 대비","문서상 실적",10,"%","약 10%","보고서만 제시","분모는 2024년 동일 종류 충전 포인트","Ⅱ-2","",""],
+      ["기술","초급속 충전 관련 전압 범위","공통","기술 설명","기술 범위",800,"V","800~1,000V","일치","숫자값은 하한 800V;상한값은 1,000V;충전 시간·출력·보급률 아님","Ⅱ-1","5",""],
+      ["계산","전기차 신차 비중 변화","세계","2025년→2026년 전망","계산값",3,"%p","+3%p","입력 수치로 계산","실적과 전망의 차이;2025년 25%는 보고서만 확인;2026년 28%는 보고서·슬라이드2에서 확인","요약 보고;Ⅱ-2","2","28 - 25"],
+      ["계산","전기차 신차 비중 상대 증가","세계","2025년→2026년 전망","계산값",12,"%","12%","입력 수치로 계산","판매량 증가율 아님;2025년 25%는 보고서만 확인;2026년 28%는 보고서·슬라이드2에서 확인","요약 보고;Ⅱ-2","2","(28 - 25) / 25 * 100"],
+      ["계산","급속·초급속 충전 포인트 역산","한국","2024년","계산 추정치",46400,"기","약 4만 6,400기","보고서 근사 수치로 역산","실제 조사·집계값 아님;백 단위 반올림","Ⅱ-2","","ROUND(51000 / 1.10, -2)"],
+      ["계산","급속·초급속 충전 포인트 증가분 역산","한국","2025년;전년 대비","계산 추정치",4600,"기","약 4,600기","보고서 근사 수치로 역산","실제 조사·집계값 아님;백 단위 반올림","Ⅱ-2","","ROUND(51000 - (51000 / 1.10), -2)"],
+      ["운영 계획","실무 점검 빈도","사업 계획","월","계획",1,"회/월","월 1회","보고서만 제시","실제 수행 횟수 아님","Ⅴ-3","",""],
+      ["운영 계획","실무 점검 연간 환산","사업 계획","연중 운영 가정","조건부 계산값",12,"회/년","연 12회","계획 빈도로 환산","연중 운영 조건;실제 수행 횟수 아님","Ⅴ-3","","1 * 12"],
+      ["운영 계획","성과 검토 빈도","사업 계획","분기","계획",1,"회/분기","분기 1회","보고서만 제시","실제 수행 횟수 아님","Ⅴ-3","",""],
+      ["운영 계획","성과 검토 연간 환산","사업 계획","연중 운영 가정","조건부 계산값",4,"회/년","연 4회","계획 빈도로 환산","연중 운영 조건;실제 수행 횟수 아님","Ⅴ-3","","1 * 4"],
+      ["구성","성과지표 수","사업 계획","계획","문서 항목 수",3,"개","3개","보고서만 제시","성공률·상태정보 제공률·핵심 소재 다변화;기준값 미확인;목표값 사업 전 설정","Ⅷ-1","",""],
+      ["구성","주요 마일스톤 수","사업 계획","계획","문서 항목 수",3,"개","3개","보고서만 제시","핵심 지표 확정·실증 완료·확산 여부 결정;구체 날짜 미확정","Ⅵ-2","",""],
+      ["구성","실행 단계 수","사업 계획","계획","문서 항목 수",5,"단계","5단계","단계 수 일치;마지막 명칭 상이","보고서 완료;발표자료 평가","Ⅵ-1","7",""],
+      ["구성","주요 리스크 수","사업 계획","계획","문서 항목 수",4,"개","4개","일치","정책·보조금;공급망 경쟁;배터리 안전;충전망 품질;발생 확률 아님","Ⅸ-1","7",""],
+      ["구성","보고서 주요 추진과제 수","사업 계획","계획","문서 항목 수",4,"개","4개","발표자료 핵심 전략 5개와 구성 차이","배터리 다변화;충전 UX;안전·이력;V2G·순환경제","Ⅲ-2","",""],
+      ["구성","발표자료 핵심 전략 수","사업 계획","계획","문서 항목 수",5,"개","5개","보고서 주요 추진과제 4개와 구성 차이","공통 4개에 글로벌 정책 대응 강화 추가","","6",""],
+      ["구성","공통 추진과제 수","사업 계획","계획","문서 항목 수",4,"개","4개","공통","추진과제 구성 전체가 동일한 것은 아님","Ⅲ-2","6",""],
+      ["성과 측정 계획","충전 이용 성공률","사업 계획","월 측정","미확인",null,"%","미확인","보고서만 제시","도착 후 정상 충전 완료 비율;기준값 미확인;목표값 사업 전 설정;빈 숫자값은 0 아님","Ⅷ-1","",""],
+      ["성과 측정 계획","배터리 상태정보 제공률","사업 계획","분기 측정","미확인",null,"%","미확인","보고서만 제시","SOH·보증·이력 제공 대상 비율;기준값 미확인;목표값 사업 전 설정;빈 숫자값은 0 아님","Ⅷ-1","",""],
+      ["성과 측정 계획","핵심 소재 다변화","사업 계획","반기 측정","미확인",null,"","미확인","보고서만 제시","대체 공급원·기술 확보 수준;측정 단위·평가 기준 미정;기준값 미확인;목표값 사업 전 설정","Ⅷ-1","",""],
+      ["예산","총 소요예산","사업 계획","사업 범위 확정 전","미산정",null,"","미산정","보고서만 제시","비용·편익 부족으로 투자 효과 계산 불가;빈 숫자값은 0 아님","Ⅶ","",""],
+      ["산출 불가","지역별 전기차 시장 규모","중국·유럽·미국","입력 자료 기준","산출 불가",null,"","산출 불가","정성적 특징만 대조 가능","지역별 판매량·점유율 미제공;숫자값 공란은 0 아님","Ⅱ-1","2",""],
+      ["산출 불가","충전 품질 개선 효과","한국","입력 자료 기준","산출 불가",null,"","산출 불가","개선 필요성만 제시","가동률·고장률·대기시간·이용 성공률 실측값 미제공;수량 확대만으로 품질 개선 정도를 판단할 수 없음","Ⅱ-3;Ⅳ-1;Ⅷ-1","3",""],
+      ["산출 불가","성과지표 달성률","사업 계획","입력 자료 기준","산출 불가",null,"%","산출 불가","보고서 계획에 수치 목표·실적 없음","기준값 미확인;목표값 사업 전 설정;실적값 미제공","Ⅷ-1","",""],
+      ["산출 불가","리스크 발생 확률","사업 계획","입력 자료 기준","산출 불가",null,"%","산출 불가","위험 유형은 공통;수치 확률 없음","확률·발생 통계 미제공;높음·중간 등 정성 평가를 점수·백분율로 임의 변환하지 않음","Ⅸ-1","7",""],
+      ["산출 불가","충전 기술의 시간 단축 효과","공통","기술 설명","산출 불가",null,"","산출 불가","전압 범위만 확인 가능","출력·배터리 용량·측정 조건·소요 시간 미제공;800~1,000V만으로 시간 단축 효과 계산 불가","Ⅱ-1","5",""]
+    ];
+
+    const keys = ["category","name","region","period","type","value","unit","display","comparison","note","report","slide","formula"];
+    const data = rawData.map((row, index) => {
+      const item = { id: index + 1 };
+      keys.forEach((key, i) => { item[key] = row[i]; });
+      return item;
+    });
+    const $ = selector => document.querySelector(selector);
+    const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[character]));
+    let page = 1;
+    let sortKey = "";
+    let sortDirection = 1;
+
+    const category = $("#category");
+    [...new Set(data.map(item => item.category))].forEach(value => {
+      const option = document.createElement("option");
+      option.value = option.textContent = value;
+      category.append(option);
+    });
+
+    function badgeClass(type) {
+      if (type === "文") return "";
+      if (type === "文書") return "";
+      if (type === "문서상 실적") return "actual";
+      if (type === "전망") return "forecast";
+      if (["미확인","미산정","산출 불가"].includes(type)) return "unknown";
+      if (type.includes("계산")) return "estimate";
+      return "";
+    }
+
+    function filteredData() {
+      const query = $("#search").value.trim().toLocaleLowerCase("ko");
+      const region = $("#region").value;
+      const period = $("#year").value;
+      const group = category.value;
+      const numericOnly = $("#numericOnly").checked;
+
+      const results = data.filter(item => {
+        const text = [item.name,item.category,item.region,item.period,item.type,item.display,item.comparison,item.note].join(" ").toLocaleLowerCase("ko");
+        const yearMatches = !period || (period === "other"
+          ? !/202[456]/.test(item.period)
+          : item.period.includes(period));
+        return (!query || text.includes(query)) &&
+          (!region || item.region === region) &&
+          (!group || item.category === group) &&
+          yearMatches &&
+          (!numericOnly || item.value !== null);
+      });
+
+      if (sortKey) {
+        results.sort((a,b) => {
+          if (sortKey === "value") {
+            if (a.value === null && b.value === null) return a.id - b.id;
+            if (a.value === null) return 1;
+            if (b.value === null) return -1;
+            return (a.value - b.value) * sortDirection || a.id - b.id;
+          }
+          return a[sortKey].localeCompare(b[sortKey],"ko") * sortDirection || a.id - b.id;
+        });
+      }
+      return results;
+    }
+
+    function renderTable() {
+      const rows = filteredData();
+      const size = Number($("#pageSize").value);
+      const pageCount = Math.max(1,Math.ceil(rows.length / size));
+      page = Math.min(page,pageCount);
+      const start = (page - 1) * size;
+      const current = rows.slice(start,start + size);
+
+      $("#tableBody").innerHTML = current.length ? current.map(item => `
+        <tr>
+          <td>${escapeHTML(item.category)}</td>
+          <td class="cell-title">${escapeHTML(item.name)}</td>
+          <td>${escapeHTML(item.region)}</td>
+          <td>${escapeHTML(item.period)}</td>
+          <td><span class="badge ${badgeClass(item.type)}">${escapeHTML(item.type)}</span></td>
+          <td class="numeric">${escapeHTML(item.display)}</td>
+          <td>${escapeHTML(item.comparison)}</td>
+          <td><button class="button text table-detail" data-detail="${item.id}" aria-label="${escapeHTML(item.name)} 근거 및 해석 제한 보기">상세</button></td>
+        </tr>`).join("") :
+        '<tr><td colspan="8" style="padding:32px;text-align:center">검색 조건에 맞는 데이터가 없습니다. 검색어나 필터를 변경하세요.</td></tr>';
+
+      $("#resultCount").textContent = `전체 ${data.length}개 중 ${rows.length}개 조회`;
+      $("#pageInfo").textContent = rows.length ? `${start + 1}–${Math.min(start + size,rows.length)} / ${rows.length}개` : "0개";
+
+      const buttons = [
+        `<button class="button" data-page="${page - 1}" ${page === 1 ? "disabled" : ""} aria-label="이전 페이지">이전</button>`
+      ];
+      for (let i = 1; i <= pageCount; i++) {
+        buttons.push(`<button class="button" data-page="${i}" ${i === page ? 'aria-current="page"' : ""} aria-label="${i}페이지">${i}</button>`);
+      }
+      buttons.push(`<button class="button" data-page="${page + 1}" ${page === pageCount ? "disabled" : ""} aria-label="다음 페이지">다음</button>`);
+      $("#pagination").innerHTML = buttons.join("");
+    }
+
+    ["#search","#region","#year","#category","#numericOnly","#pageSize"].forEach(selector => {
+      $(selector).addEventListener(selector === "#search" ? "input" : "change", () => {
+        page = 1;
+        renderTable();
+      });
+    });
+    $("#filterForm").addEventListener("submit", event => event.preventDefault());
+    $("#filterForm").addEventListener("reset", () => {
+      $("#numericOnly").checked = false;
+      page = 1;
+      sortKey = "";
+      sortDirection = 1;
+      document.querySelectorAll("th[aria-sort]").forEach(th => th.setAttribute("aria-sort","none"));
+      document.querySelectorAll("[data-sort]").forEach(button => {
+        button.textContent = `${button.dataset.sort === "category" ? "분류" : button.dataset.sort === "name" ? "항목" : "표시값"} ↕`;
+      });
+      setTimeout(renderTable,0);
+    });
+
+    document.querySelectorAll("[data-sort]").forEach(button => {
+      button.addEventListener("click", () => {
+        const key = button.dataset.sort;
+        sortDirection = sortKey === key ? -sortDirection : 1;
+        sortKey = key;
+        page = 1;
+        document.querySelectorAll("[data-sort]").forEach(other => {
+          const active = other === button;
+          other.closest("th").setAttribute("aria-sort",active ? (sortDirection === 1 ? "ascending" : "descending") : "none");
+          const label = other.dataset.sort === "category" ? "분류" : other.dataset.sort === "name" ? "항목" : "표시값";
+          other.textContent = `${label} ${active ? (sortDirection === 1 ? "↑" : "↓") : "↕"}`;
+        });
+        renderTable();
+      });
+    });
+
+    $("#pagination").addEventListener("click", event => {
+      const button = event.target.closest("[data-page]");
+      if (!button || button.disabled) return;
+      page = Number(button.dataset.page);
+      renderTable();
+      const currentButton = $("#pagination").querySelector('[aria-current="page"]');
+      if (currentButton) currentButton.focus();
+    });
+
+    let dialogOpener = null;
+    function openDialog(id, opener) {
+      closeDropdown();
+      dialogOpener = opener || document.activeElement;
+      $(id).showModal();
+    }
+    document.querySelectorAll("dialog").forEach(dialog => {
+      dialog.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", () => dialog.close()));
+      dialog.addEventListener("close", () => {
+        if (dialogOpener && dialogOpener.isConnected) dialogOpener.focus();
+      });
+    });
+
+    $("#tableBody").addEventListener("click", event => {
+      const button = event.target.closest("[data-detail]");
+      if (!button) return;
+      const item = data.find(row => row.id === Number(button.dataset.detail));
+      $("#detailTitle").textContent = item.name;
+      const fields = [
+        ["분류 / 지역",`${item.category} / ${item.region}`],
+        ["기준 시점",item.period],
+        ["수치 구분",item.type],
+        ["표시값",item.display],
+        ["숫자값",item.value === null ? "공란 — 0이 아님" : `${item.value.toLocaleString("ko-KR")} ${item.unit}`],
+        ["보고서 위치",item.report || "해당 항목 위치 미기재"],
+        ["발표자료 슬라이드",item.slide ? `${item.slide}번` : "해당 항목 미제시"],
+        ["대조 결과",item.comparison],
+        ["계산식",item.formula || "해당 없음"],
+        ["해석 및 제한",item.note],
+        ["검증 범위","입력 자료 간 대조 및 계산 검수. 원출처 통계의 정확성·최신성 별도 미검증. 보고서·발표자료는 동일 연구 기반으로 독립적인 두 출처의 검증이 아님."]
+      ];
+      $("#detailBody").innerHTML = `<dl>${fields.map(([label,value]) => `<div><dt>${escapeHTML(label)}</dt><dd>${escapeHTML(value)}</dd></div>`).join("")}</dl>`;
+      openDialog("#detailDialog",button);
+    });
+
+    const settingsButton = $("#settingsButton");
+    function closeDropdown() {
+      $("#settingsMenu").hidden = true;
+      settingsButton.setAttribute("aria-expanded","false");
+    }
+    settingsButton.addEventListener("click", () => {
+      const open = $("#settingsMenu").hidden;
+      $("#settingsMenu").hidden = !open;
+      settingsButton.setAttribute("aria-expanded",String(open));
+    });
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".settings-dropdown")) closeDropdown();
+    });
+    $("#displayButton").addEventListener("click", () => openDialog("#displayDialog",settingsButton));
+    ["#sourceButton","#infoButton","#limitationsButton"].forEach(selector => {
+      $(selector).addEventListener("click", event => openDialog("#infoDialog", selector === "#infoButton" ? settingsButton : event.currentTarget));
+    });
+
+    const palettes = {
+      blue: ["#174ea6","#103c83","#eef4ff"],
+      orange: ["#9a3e08","#7a2f04","#fff3e9"],
+      green: ["#14613e","#0d492e","#edf7f1"]
+    };
+    $("#themeColor").addEventListener("change", event => {
+      const colors = palettes[event.target.value];
+      ["--color-primary","--color-primary-hover","--color-primary-soft"].forEach((token,index) => {
+        document.documentElement.style.setProperty(token,colors[index]);
+      });
+    });
+    $("#compact").addEventListener("change", event => $("#dataTable").classList.toggle("compact",event.target.checked));
+
+    const menuButton = $("#menuButton");
+    function closeMobileMenu(returnFocus = false) {
+      $("#sidebar").classList.remove("open");
+      $("#overlay").classList.remove("open");
+      menuButton.setAttribute("aria-expanded","false");
+      menuButton.setAttribute("aria-label","메뉴 열기");
+      if (returnFocus) menuButton.focus();
+    }
+    menuButton.addEventListener("click", () => {
+      const open = !$("#sidebar").classList.contains("open");
+      $("#sidebar").classList.toggle("open",open);
+      $("#overlay").classList.toggle("open",open);
+      menuButton.setAttribute("aria-expanded",String(open));
+      menuButton.setAttribute("aria-label",open ? "메뉴 닫기" : "메뉴 열기");
+      if (open) $("#sidebar .nav-link").focus();
+    });
+    $("#overlay").addEventListener("click", () => closeMobileMenu(true));
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        if (!$("#settingsMenu").hidden) { closeDropdown(); settingsButton.focus(); }
+        if ($("#sidebar").classList.contains("open")) closeMobileMenu(true);
+      }
+      if (event.key === "Tab" && $("#sidebar").classList.contains("open") && window.innerWidth < 768) {
+        const links = [...$("#sidebar").querySelectorAll("a")];
+        const first = links[0], last = links[links.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); menuButton.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); menuButton.focus(); }
+        else if (document.activeElement === menuButton) { event.preventDefault(); (event.shiftKey ? last : first).focus(); }
+      }
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) closeMobileMenu();
+    });
+
+    const navLinks = [...document.querySelectorAll(".nav-link")];
+    function markActive(hash) {
+      navLinks.forEach(link => {
+        const active = link.getAttribute("href") === hash;
+        link.classList.toggle("active",active);
+        if (active) link.setAttribute("aria-current","location");
+        else link.removeAttribute("aria-current");
+      });
+    }
+    navLinks.forEach(link => link.addEventListener("click", () => {
+      markActive(link.getAttribute("href"));
+      closeMobileMenu();
+      const section = $(link.getAttribute("href"));
+      section.setAttribute("tabindex","-1");
+      section.focus({preventScroll:true});
+    }));
+    $("#goToData").addEventListener("click", () => {
+      $("#data").scrollIntoView();
+      markActive("#data");
+      $("#search").focus({preventScroll:true});
+    });
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries.filter(entry => entry.isIntersecting);
+        if (visible.length) markActive(`#${visible[0].target.id}`);
+      }, { rootMargin: "-15% 0px -65% 0px", threshold: 0 });
+      navLinks.forEach(link => observer.observe($(link.getAttribute("href"))));
+    }
+
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    function selectTab(tab, focus = false) {
+      tabs.forEach(item => {
+        const active = item === tab;
+        item.setAttribute("aria-selected",String(active));
+        item.tabIndex = active ? 0 : -1;
+        document.getElementById(item.getAttribute("aria-controls")).hidden = !active;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach((tab,index) => {
+      tab.addEventListener("click", () => selectTab(tab));
+      tab.addEventListener("keydown", event => {
+        let target;
+        if (event.key === "ArrowRight") target = tabs[(index + 1) % tabs.length];
+        if (event.key === "ArrowLeft") target = tabs[(index - 1 + tabs.length) % tabs.length];
+        if (event.key === "Home") target = tabs[0];
+        if (event.key === "End") target = tabs[tabs.length - 1];
+        if (target) { event.preventDefault(); selectTab(target,true); }
+      });
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>
